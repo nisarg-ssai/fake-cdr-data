@@ -1,14 +1,17 @@
-import { faker } from "@faker-js/faker";
-import { v4 as uuidv4 } from "uuid";
+const { faker } = require("@faker-js/faker");
+const { v4: uuidv4 } = require("uuid");
+const agents = require("./agents");
+const fs = require("fs");
 
-function generateDoc(startDate, endDate) {
-    const customerPhoneNumber = faker.phone.number();
-    const agentFirstName = faker.person.firstName().toLocaleLowerCase();
-    const doc = {
+function generateCdr(agent, startDate, endDate) {
+    const customerPhoneNumber = faker.string.numeric(10);
+    // const agentFirstName = faker.person.firstName().toLocaleLowerCase();
+
+    const cdr = {
         // sessionId: "ee6ef064-c663-4723-a314-3b1bcfeefd92",
         sessionId: uuidv4(),
         // date: "2024-03-14 18:34:34",
-        date: faker.date.between({ startDate, endDate }),
+        date: faker.date.between({ from: startDate, to: endDate }),
         // customerNumber: "8160634703",
         customerNumber: customerPhoneNumber,
         customerInfo: {
@@ -26,21 +29,8 @@ function generateDoc(startDate, endDate) {
             _id: customerPhoneNumber,
         },
         // agentName: "himanshuagent",
-        agentName: agentFirstName + "agent",
-        agentInfo: {
-            // create_at: "2023-08-08T10:41:40.170Z",
-            create_at: faker.date.past({ refDate: startDate }),
-            // email: "himanshuagent@gmail.com",
-            email: `${agentFirstName}@gmail.com`,
-            role: 6,
-            // userId: "ea3ffe57-5734-4159-82bd-596df7a68830",
-            userId: uuidv4(),
-            update_at: faker.date.future({ refDate: startDate }),
-            name: "himanshuagent",
-            name: agentFirstName + "agent",
-            user_name: "himanshuagent",
-            user_name: agentFirstName + "agent",
-        },
+        agentName: agent.name + "agent",
+        agentInfo: agent,
         campaign: "-",
         // dnis: "13214996271",
         dnis: uuidv4(),
@@ -48,10 +38,14 @@ function generateDoc(startDate, endDate) {
         callingMode: ["Manual", "Auto", "Preview"][
             Math.floor(Math.random() * 3)
         ],
-        ivrTime: "-", // 1 30
-        queueTime: "-",
-        ringing: 12,
-        talkTime: "-",
+        // ivrTime: "-",
+        ivrTime: Math.floor(Math.random() * 30),
+        // queueTime: "-",
+        queueTime: Math.floor(Math.random() * 30),
+        // ringing: 12,
+        ringing: Math.floor(Math.random() * 30),
+        // talkTime: "-",
+        talkTime: Math.floor(Math.random() * 30),
 
         DTMFs: "-",
         CSATs: "-",
@@ -59,18 +53,18 @@ function generateDoc(startDate, endDate) {
         firstLevel: "wrong number",
         secondLevel: "-",
         thirdLevel: "-",
-        Answered: "false",
+        Answered: Date.now() % 2 === 0,
         List: "-",
 
         hold: "-",
         mute: "-",
-        
+
         comment: "-",
         disconnectedBy: "AGENT",
         flow: "-",
         hungupCauseCode: "200",
         hungupCause: "NORMAL_CLEARING",
-        recording: "ccf80371-7fd6-4008-8a5d-f93dacdd2eec.wav",
+        recording: `${uuidv4()}.wav`,
         teamName: "My Team",
         holdCount: "-",
         muteCount: "-",
@@ -79,4 +73,24 @@ function generateDoc(startDate, endDate) {
         slotsData: "-",
         dropReason: "FAILED",
     };
+
+    return cdr;
 }
+
+function createCrdEntries(count, startDate, endDate, filepath) {
+    const cdrArray = [];
+    for (let i = 0; i < count; i++) {
+        const agent = agents[Math.floor(Math.random() * agents.length)];
+        const cdr = generateCdr(agent, startDate, endDate);
+        cdrArray.push(cdr);
+    }
+    const text = `${JSON.stringify(cdrArray, null, 4)}`;
+
+    try {
+        fs.writeFileSync(filepath, text);
+    } catch (error) {
+        console.log(error);
+    }
+}
+
+module.exports = { createCrdEntries };
