@@ -12,7 +12,7 @@ function generateAgent(create_at, update_at) {
         name,
         user_name: `${name}agent`,
         email: `${name}@gmail.com`,
-        role: Math.floor(Math.random() * 6),
+        role: Math.floor(Math.random() * 6) + 1,
         userId: uuidv4(),
         create_at,
         update_at,

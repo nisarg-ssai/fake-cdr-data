@@ -77,20 +77,22 @@ function generateCdr(agent, startDate, endDate) {
     return cdr;
 }
 
-function createCrdEntries(count, startDate, endDate, filepath) {
+function createCrdEntries(count, startDate, endDate, filepath = null) {
     const cdrArray = [];
     for (let i = 0; i < count; i++) {
         const agent = agents[Math.floor(Math.random() * agents.length)];
         const cdr = generateCdr(agent, startDate, endDate);
         cdrArray.push(cdr);
     }
-    const text = `${JSON.stringify(cdrArray, null, 4)}`;
-
-    try {
-        fs.writeFileSync(filepath, text);
-    } catch (error) {
-        console.log(error);
+    if (filepath) {
+        const text = `${JSON.stringify(cdrArray, null, 4)}`;
+        try {
+            fs.writeFileSync(filepath, text);
+        } catch (error) {
+            console.log(error);
+        }
     }
+    return cdrArray
 }
 
-module.exports = { createCrdEntries };
+module.exports = { createCrdEntries, generateCdr };
